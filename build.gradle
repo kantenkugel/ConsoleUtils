@@ -1,6 +1,6 @@
 plugins {
-    id 'com.jfrog.bintray' version '1.7.3'
     id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.7.3'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '2.0.1'
     id 'com.github.ben-manes.versions' version '0.15.0'
@@ -31,9 +31,21 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
+publishing {
+    publications {
+        BintrayRelease(MavenPublication) {
+            from components.java
+            groupId group
+            artifactId archivesBaseName
+            version version
+            artifact sourcesJar
+        }
+    }
+}
+
 bintray {
-    user = bintrayUsername
-    key = bintrayApiKey
+    user = getProjectProperty("bintrayUsername")
+    key = getProjectProperty("bintrayApiKey")
     publications = ["BintrayRelease"]
     pkg {
         repo = 'maven'
@@ -44,18 +56,6 @@ bintray {
         version {
             name = project.version
             released = new Date()
-        }
-    }
-}
-
-publishing {
-    publications {
-        BintrayRelease(MavenPublication) {
-            from components.java
-            groupId group
-            artifactId archivesBaseName
-            version version
-            artifact sourcesJar
         }
     }
 }
