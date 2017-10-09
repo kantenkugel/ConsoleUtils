@@ -42,6 +42,10 @@ public class ConsoleUtils {
                             ConsoleUtils.backspace();
                     }
                     continue;
+                } else if(read == CharConstants.CHAR_CTRL_C && (b.length() == 0 ||
+                        (initialBuffer != null && initialBuffer.length() == b.length() && initialBuffer.equals(b.toString())))) {
+                    //if user pressed ctrl+c on "empty" input, return null to let calling code know
+                    return null;
                 } else {
                     return b.toString();
                 }
