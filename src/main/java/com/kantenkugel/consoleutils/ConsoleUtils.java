@@ -7,48 +7,11 @@ import java.io.IOException;
 
 public class ConsoleUtils {
     public static String readHidden(String placeholder) throws IOException {
-        StringBuilder b = new StringBuilder();
-        int read;
-        while ((read = RawConsoleInput.read(true)) != -1) {
-            if (read == '\r' || read == '\n') return b.toString();
-            if(!isPrintableChar((char) read)) {
-                if(read == CharConstants.CHAR_BACKSPACE) {
-                    if(b.length() == 0) continue;
-                    b.setLength(b.length() - 1);
-                    for(int i = 0; i < placeholder.length(); i++) {
-                        backspace();
-                    }
-                    continue;
-                } else {
-                    return b.toString();
-                }
-            }
-            b.append((char) read);
-            System.out.print(placeholder);
-        }
-        return b.toString();
+        return readInternal(placeholder, null);
     }
 
     public static String readWithInitialBuffer(String init) throws IOException {
-        System.out.print(init);
-        StringBuilder b = new StringBuilder(init);
-        int read;
-        while ((read = RawConsoleInput.read(true)) != -1) {
-            if (read == '\r' || read == '\n') return b.toString();
-            if (!isPrintableChar((char) read)) {
-                if(read == CharConstants.CHAR_BACKSPACE) {
-                    if(b.length() == 0) continue;
-                    b.setLength(b.length() - 1);
-                    ConsoleUtils.backspace();
-                    continue;
-                } else {
-                    return b.toString();
-                }
-            }
-            b.append((char) read);
-            System.out.print((char) read);
-        }
-        return b.toString();
+        return readInternal(null, init);
     }
 
     public static void backspace() {
@@ -63,6 +26,33 @@ public class ConsoleUtils {
                 c != KeyEvent.CHAR_UNDEFINED &&
                 block != null &&
                 block != Character.UnicodeBlock.SPECIALS;
+    }
+
+    private static String readInternal(String placeholder, String initialBuffer) throws IOException {
+        StringBuilder b = initialBuffer == null ? new StringBuilder() : new StringBuilder(initialBuffer);
+        int read;
+        while ((read = RawConsoleInput.read(true)) != -1) {
+            if (read == '\r' || read == '\n') return b.toString();
+            if(!isPrintableChar((char) read)) {
+                if(read == CharConstants.CHAR_BACKSPACE) {
+                    if(b.length() == 0) continue;
+                    b.setLength(b.length() - 1);
+                    if(placeholder != null) {
+                        for(int i = 0; i < placeholder.length(); i++)
+                            ConsoleUtils.backspace();
+                    }
+                    continue;
+                } else {
+                    return b.toString();
+                }
+            }
+            b.append((char) read);
+            if(placeholder != null)
+                System.out.print(placeholder);
+            else
+                System.out.print((char) read);
+        }
+        return b.toString();
     }
 
     private ConsoleUtils() {}
