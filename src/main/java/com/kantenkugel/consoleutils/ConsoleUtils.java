@@ -9,25 +9,14 @@ public class ConsoleUtils {
     public static String readHidden(String placeholder) throws IOException {
         StringBuilder b = new StringBuilder();
         int read;
-        while(true) {
-            read = RawConsoleInput.read(true);
-            if(read == -1)
-                return b.toString();
-            if(read == '\r' || read == '\n')
-                return b.toString();
+        while ((read = RawConsoleInput.read(true)) != -1) {
+            if (read == '\r' || read == '\n') return b.toString();
             if(!isPrintableChar((char) read)) {
                 if(read == CharConstants.CHAR_BACKSPACE) {
-                    if(b.length() == 0)
-                        continue;
+                    if(b.length() == 0) continue;
                     b.setLength(b.length() - 1);
                     for(int i = 0; i < placeholder.length(); i++) {
-                        System.out.print(CharConstants.CHAR_BACKSPACE);
-                    }
-                    for(int i = 0; i < placeholder.length(); i++) {
-                        System.out.print(" ");
-                    }
-                    for(int i = 0; i < placeholder.length(); i++) {
-                        System.out.print(CharConstants.CHAR_BACKSPACE);
+                        backspace();
                     }
                     continue;
                 } else {
@@ -37,6 +26,35 @@ public class ConsoleUtils {
             b.append((char) read);
             System.out.print(placeholder);
         }
+        return b.toString();
+    }
+
+    public static String readWithInitialBuffer(String init) throws IOException {
+        System.out.print(init);
+        StringBuilder b = new StringBuilder(init);
+        int read;
+        while ((read = RawConsoleInput.read(true)) != -1) {
+            if (read == '\r' || read == '\n') return b.toString();
+            if (!isPrintableChar((char) read)) {
+                if(read == CharConstants.CHAR_BACKSPACE) {
+                    if(b.length() == 0) continue;
+                    b.setLength(b.length() - 1);
+                    ConsoleUtils.backspace();
+                    continue;
+                } else {
+                    return b.toString();
+                }
+            }
+            b.append((char) read);
+            System.out.print((char) read);
+        }
+        return b.toString();
+    }
+
+    public static void backspace() {
+        System.out.print(CharConstants.CHAR_BACKSPACE);
+        System.out.print(' ');
+        System.out.print(CharConstants.CHAR_BACKSPACE);
     }
 
     public static boolean isPrintableChar( char c ) {
@@ -47,7 +65,5 @@ public class ConsoleUtils {
                 block != Character.UnicodeBlock.SPECIALS;
     }
 
-    private ConsoleUtils() {
-
-    }
+    private ConsoleUtils() {}
 }
