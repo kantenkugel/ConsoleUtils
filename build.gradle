@@ -70,6 +70,8 @@ String getProjectProperty(String propertyName)
     return property
 }
 
+assemble.dependsOn sourcesJar
+
 build {
     dependsOn clean
     dependsOn jar
