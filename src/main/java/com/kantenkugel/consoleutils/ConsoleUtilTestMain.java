@@ -1,8 +1,5 @@
 package com.kantenkugel.consoleutils;
 
-import com.kantenkugel.consoleutils.AutoCompleter;
-import com.kantenkugel.consoleutils.ConsoleUtils;
-
 import java.io.IOException;
 
 public class ConsoleUtilTestMain {

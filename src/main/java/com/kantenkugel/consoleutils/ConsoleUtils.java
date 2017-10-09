@@ -29,10 +29,11 @@ public class ConsoleUtils {
     }
 
     private static String readInternal(String placeholder, String initialBuffer) throws IOException {
+        if(initialBuffer != null)
+            System.out.print(initialBuffer);
         StringBuilder b = initialBuffer == null ? new StringBuilder() : new StringBuilder(initialBuffer);
         int read;
         while ((read = RawConsoleInput.read(true)) != -1) {
-            if (read == '\r' || read == '\n') return b.toString();
             if(!isPrintableChar((char) read)) {
                 if(read == CharConstants.CHAR_BACKSPACE) {
                     if(b.length() == 0) continue;
@@ -40,22 +41,25 @@ public class ConsoleUtils {
                     if(placeholder != null) {
                         for(int i = 0; i < placeholder.length(); i++)
                             ConsoleUtils.backspace();
+                    } else {
+                        ConsoleUtils.backspace();
                     }
                     continue;
-                } else if(read == CharConstants.CHAR_CTRL_C && (b.length() == 0 ||
+                }
+                if(read == CharConstants.CHAR_CTRL_C && (b.length() == 0 ||
                         (initialBuffer != null && initialBuffer.length() == b.length() && initialBuffer.equals(b.toString())))) {
                     //if user pressed ctrl+c on "empty" input, return null to let calling code know
                     return null;
-                } else {
-                    return b.toString();
                 }
+                break;
             }
             b.append((char) read);
-            if(placeholder != null)
+            if(placeholder != null && placeholder.length() > 0)
                 System.out.print(placeholder);
-            else
+            else if(placeholder == null)
                 System.out.print((char) read);
         }
+        System.out.print("\n");
         return b.toString();
     }
 
