@@ -1,16 +1,14 @@
 plugins {
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.7.3'
-    id 'application'
+    id 'java'
     id 'com.github.johnrengelman.shadow' version '2.0.1'
     id 'com.github.ben-manes.versions' version '0.15.0'
 }
 
 group 'com.kantenkugel'
 archivesBaseName = "ConsoleUtils"
-version '1.0'
-
-mainClassName = 'com.kantenkugel.consoleutils.ConsoleUtilTestMain'
+version '1.1'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -74,6 +72,7 @@ String getProjectProperty(String propertyName)
 }
 
 assemble.dependsOn sourcesJar
+assemble.dependsOn shadowJar
 
 build {
     dependsOn clean
