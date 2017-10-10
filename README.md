@@ -6,7 +6,7 @@
 ConsoleUtils - Using raw console input in java
 ==============================================
 
-#Description
+# Description
 This Project uses raw console input (via JNA) to provide some utility methods.
 
 Currently available features:
@@ -15,21 +15,21 @@ Currently available features:
 - Read console input with given preexisting buffer
 - Simple Auto-complete functionality (Experimental)
 
-#Build-Status
+# Build-Status
 We are using Travis-CI to validate our Builds.
 
 Current Status: [![buildStatus][]][buildLink]
 
-#License
+# License
 This Project is licensed under the [Eclipse Public License v1.0](LICENSE.md)
 
-#Getting the Project
+# Getting the Project
 You can get this Project from JCenter: [![version][]][maven] 
 
-#Dependencies
+# Dependencies
 ConsoleUtils uses Gradle for dependency management & distribution.
 
-##Current Dependencies:
+## Current Dependencies:
 Runtime:
   - JNA *v4.5.0*
   
