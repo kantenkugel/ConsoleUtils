@@ -28,7 +28,8 @@ public class MockUtils {
      *         The String to use for console input
      * @throws IOException
      *         In case of an IO error (unexpected)
-     * @return A Supplier that once called restores System.out and returns produced output
+     * @return A Supplier that once called restores System.out and returns a Pair consisting of
+     *         remaining (unconsumed) input and produced output
      *
      * @see #mockIO(String, Object...)
      */
@@ -49,7 +50,8 @@ public class MockUtils {
      *         If non-null and non-empty, this is used to format the input string
      * @throws IOException
      *         In case of an IO error (unexpected)
-     * @return A Supplier that once called restores System.out and returns produced output
+     * @return A Supplier that once called restores System.out and returns a Pair consisting of
+     *         remaining (unconsumed) input and produced output
      */
     public static Supplier<Pair<String, String>> mockIO(String input, Object... format) throws IOException {
         if(format != null && format.length > 0)
