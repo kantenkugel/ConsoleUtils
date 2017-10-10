@@ -2,6 +2,9 @@ package com.kantenkugel.consoleutils;
 
 import java.io.IOException;
 
+/**
+ * @author Kantenkugel (Michael Ritter)
+ */
 public class ConsoleUtilTestMain {
     private static String[] AUTOCOMPLETE = {"auto", "autocomplete", "test", "testing"};
 

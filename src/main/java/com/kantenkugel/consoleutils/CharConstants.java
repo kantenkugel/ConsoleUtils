@@ -1,5 +1,8 @@
 package com.kantenkugel.consoleutils;
 
+/**
+ * @author Kantenkugel (Michael Ritter)
+ */
 public final class CharConstants {
     public static final char CHAR_CTRL_C = (char) 3;
     public static final char CHAR_CTRL_D = (char) 4;
@@ -8,6 +11,5 @@ public final class CharConstants {
     public static final char CHAR_BACKSPACE = (char) 8;
     public static final char CHAR_TAB = (char) 9;
 
-    private CharConstants() {
-    }
+    private CharConstants() {}
 }

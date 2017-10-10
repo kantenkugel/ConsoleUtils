@@ -17,6 +17,9 @@ import static com.kantenkugel.consoleutils.MockUtils.mockIO;
 import java.io.IOException;
 import java.util.function.Supplier;
 
+/**
+ * @author Kantenkugel (Michael Ritter)
+ */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RawConsoleInput.class, ConsoleUtils.class})
 public class ConsoleUtilsTests {

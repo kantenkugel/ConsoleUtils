@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * @author Kantenkugel (Michael Ritter)
+ */
 public class AutoCompleter implements Consumer<ConsoleInputEvent> {
     private final Consumer<String> callback;
     private final Function<String, String[]> optionProvider;

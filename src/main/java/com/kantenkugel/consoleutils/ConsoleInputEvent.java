@@ -1,5 +1,8 @@
 package com.kantenkugel.consoleutils;
 
+/**
+ * @author Kantenkugel (Michael Ritter)
+ */
 public class ConsoleInputEvent {
     private final StringBuilder currentBuffer;
     private final char addedChar;

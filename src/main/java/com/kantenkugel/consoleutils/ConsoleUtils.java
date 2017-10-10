@@ -5,6 +5,9 @@ import biz.source_code.utils.RawConsoleInput;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 
+/**
+ * @author Kantenkugel (Michael Ritter) & Avarel
+ */
 public class ConsoleUtils {
     public static String readHidden(String placeholder) throws IOException {
         return readInternal(placeholder, null);

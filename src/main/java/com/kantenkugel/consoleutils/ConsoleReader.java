@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+/**
+ * @author Kantenkugel (Michael Ritter)
+ */
 public class ConsoleReader {
     public static Runnable startLoop(Consumer<ConsoleInputEvent> consoleHandler) throws IOException {
         AtomicBoolean running = new AtomicBoolean(true);

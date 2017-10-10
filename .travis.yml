@@ -2,3 +2,10 @@ language: java
 branches:
   only:
     - master
+deploy:
+  provider: releases
+  file_glob: true
+  file: build/libs/*.jar
+  skip_cleanup: true
+  on:
+    tags: true
