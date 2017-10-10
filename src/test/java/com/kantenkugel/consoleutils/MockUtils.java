@@ -1,14 +1,19 @@
 package com.kantenkugel.consoleutils;
 
 import biz.source_code.utils.RawConsoleInput;
+import javafx.util.Pair;
 import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.function.Supplier;
 
 /**
@@ -27,7 +32,7 @@ public class MockUtils {
      *
      * @see #mockIO(String, Object...)
      */
-    public static Supplier<String> mockIO(String input) throws IOException {
+    public static Supplier<Pair<String, String>> mockIO(String input) throws IOException {
         return mockIO(input, (Object[]) null);
     }
 
@@ -46,22 +51,28 @@ public class MockUtils {
      *         In case of an IO error (unexpected)
      * @return A Supplier that once called restores System.out and returns produced output
      */
-    public static Supplier<String> mockIO(String input, Object... format) throws IOException {
+    public static Supplier<Pair<String, String>> mockIO(String input, Object... format) throws IOException {
         if(format != null && format.length > 0)
             input = String.format(input, format);
         PrintStream out = System.out;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         System.setOut(new PrintStream(bos));
         PowerMockito.mockStatic(RawConsoleInput.class);
-        int[] codepoints = input.codePoints().toArray();
-        OngoingStubbing<Integer> when = Mockito.when(RawConsoleInput.read(true));
-        for(int codepoint : codepoints) {
-            when = when.thenReturn(codepoint);
-        }
-        when.thenThrow(new IOException("To many read calls"));
+        Queue<Integer> codePoints = input.codePoints().collect(LinkedList<Integer>::new, List::add, List::addAll);
+        Mockito.when(RawConsoleInput.read(true)).thenAnswer(new Answer<Integer>() {
+            @Override
+            public Integer answer(InvocationOnMock invocation) throws Throwable {
+                if(codePoints.isEmpty())
+                    throw new IOException("Too many read calls");
+                return codePoints.poll();
+            }
+        });
         return () -> {
             System.setOut(out);
-            return new String(bos.toByteArray(), StandardCharsets.UTF_8);
+            return new Pair<>(
+                    new String(codePoints.stream().mapToInt(Integer::intValue).toArray(),0, codePoints.size()),
+                    new String(bos.toByteArray(), StandardCharsets.UTF_8)
+            );
         };
     }
 
