@@ -12,6 +12,9 @@ public class ConsoleUtilTestMain {
         if(System.console() == null)
             return;
 //        System.out.println(ConsoleUtils.readHidden("*"));
-        new AutoCompleter(s -> System.out.print('\n' + s), pre -> AUTOCOMPLETE).run();
+        new AutoCompleter(s -> {
+            System.out.print('\n' + s);
+            return true;
+        }, pre -> AUTOCOMPLETE).run();
     }
 }

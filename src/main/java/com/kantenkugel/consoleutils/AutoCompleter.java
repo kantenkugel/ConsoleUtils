@@ -3,17 +3,18 @@ package com.kantenkugel.consoleutils;
 import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author Kantenkugel (Michael Ritter)
  */
 public class AutoCompleter implements Consumer<ConsoleInputEvent> {
-    private final Consumer<String> callback;
+    private final Predicate<String> callback;
     private final Function<String, String[]> optionProvider;
 
     private Runnable loopStopper;
 
-    public AutoCompleter(Consumer<String> callback, Function<String, String[]> optionProvider) {
+    public AutoCompleter(Predicate<String> callback, Function<String, String[]> optionProvider) {
         this.callback = callback;
         this.optionProvider = optionProvider;
     }
@@ -36,14 +37,17 @@ public class AutoCompleter implements Consumer<ConsoleInputEvent> {
         if(addedChar == CharConstants.CHAR_CTRL_C || addedChar == CharConstants.CHAR_CTRL_D
                 || addedChar == CharConstants.CHAR_CTRL_Z) {
             e.cancelLoop();
-            callback.accept(null);
+            callback.test(null);
             return;
         }
         if(addedChar == '\n') {
             if(currentAuto != null) {
                 clear(currentAuto.length() - matchLength);
             }
-            callback.accept(e.getCurrentBuffer().toString());
+            if(!callback.test(e.getCurrentBuffer().substring(0, e.getCurrentBuffer().length() - 1))) {
+                e.cancelLoop();
+                return;
+            }
             e.clearBuffer();
         }
         if(addedChar != CharConstants.CHAR_TAB) {

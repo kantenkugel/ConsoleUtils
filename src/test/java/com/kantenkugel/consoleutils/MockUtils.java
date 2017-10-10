@@ -17,6 +17,7 @@ import java.util.Queue;
 import java.util.function.Supplier;
 
 /**
+ * Used to help with Mocking of console input and System.out
  * @author Kantenkugel (Michael Ritter)
  */
 public class MockUtils {
@@ -61,13 +62,10 @@ public class MockUtils {
         System.setOut(new PrintStream(bos));
         PowerMockito.mockStatic(RawConsoleInput.class);
         Queue<Integer> codePoints = input.codePoints().collect(LinkedList<Integer>::new, List::add, List::addAll);
-        Mockito.when(RawConsoleInput.read(true)).thenAnswer(new Answer<Integer>() {
-            @Override
-            public Integer answer(InvocationOnMock invocation) throws Throwable {
-                if(codePoints.isEmpty())
-                    throw new IOException("Too many read calls");
-                return codePoints.poll();
-            }
+        Mockito.when(RawConsoleInput.read(true)).thenAnswer((Answer<Integer>) invocation -> {
+            if(codePoints.isEmpty())
+                return (int) CharConstants.CHAR_CTRL_D;
+            return codePoints.poll();
         });
         return () -> {
             System.setOut(out);
