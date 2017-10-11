@@ -31,6 +31,9 @@ public class AutoCompleter implements Consumer<ConsoleInputEvent> {
     private String currentAuto = null;
     private int matchLength = 0;
 
+    private String lastOptionCallArg = null;
+    private String[] options;
+
     @Override
     public void accept(ConsoleInputEvent e) {
         char addedChar = e.getAddedChar();
@@ -63,12 +66,18 @@ public class AutoCompleter implements Consumer<ConsoleInputEvent> {
             String substring = currentAuto.substring(matchLength);
             System.out.print(substring);
             e.getCurrentBuffer().replace(e.getCurrentBuffer().length() - 1, e.getCurrentBuffer().length(), substring);
+            currentAuto = null;
         }
         int index = e.getCurrentBuffer().lastIndexOf(" ");
         String lastWord = e.getCurrentBuffer().substring(index + 1);
         String nextAuto = null;
         if(lastWord.length() > 0) {
-            for(String s : optionProvider.apply(e.getCurrentBuffer().substring(0, Math.max(0, index)))) {
+            String previousInput = e.getCurrentBuffer().substring(0, Math.max(0, index));
+            if(!previousInput.equals(lastOptionCallArg)) {
+                lastOptionCallArg = previousInput;
+                options = optionProvider.apply(previousInput);
+            }
+            for(String s : options) {
                 if(s.startsWith(lastWord) && s.length() != lastWord.length()) {
                     nextAuto = s;
                     matchLength = lastWord.length();

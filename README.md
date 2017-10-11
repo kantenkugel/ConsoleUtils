@@ -38,7 +38,7 @@ Testing:
   - Mockito *v2.8 (2.9 not supported by PowerMock)*
   - PowerMock for JUnit and Mockito2 *v1.7.1*
 
-## Contributing
+# Contributing
 Feel free to contribute to this Project by creating a PR.
 
 Some guidelines for contributing:

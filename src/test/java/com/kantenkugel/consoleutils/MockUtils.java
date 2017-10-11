@@ -2,6 +2,7 @@ package com.kantenkugel.consoleutils;
 
 import biz.source_code.utils.RawConsoleInput;
 import javafx.util.Pair;
+import org.mockito.Answers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -10,10 +11,13 @@ import org.powermock.api.mockito.PowerMockito;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -34,7 +38,7 @@ public class MockUtils {
      *
      * @see #mockIO(String, Object...)
      */
-    public static Supplier<Pair<String, String>> mockIO(String input) throws IOException {
+    static Supplier<Pair<String, String>> mockIO(String input) throws IOException {
         return mockIO(input, (Object[]) null);
     }
 
@@ -54,7 +58,7 @@ public class MockUtils {
      * @return A Supplier that once called restores System.out and returns a Pair consisting of
      *         remaining (unconsumed) input and produced output
      */
-    public static Supplier<Pair<String, String>> mockIO(String input, Object... format) throws IOException {
+    static Supplier<Pair<String, String>> mockIO(String input, Object... format) throws IOException {
         if(format != null && format.length > 0)
             input = String.format(input, format);
         PrintStream out = System.out;
@@ -74,6 +78,27 @@ public class MockUtils {
                     new String(bos.toByteArray(), StandardCharsets.UTF_8)
             );
         };
+    }
+
+    /**
+     * Mocks ConsoleReader to not use a Thread for console reading.
+     * This enables verification of calls & arguments in a deterministic manner.
+     *
+     * @throws IOException
+     *         In case of an IO error (unexpected)
+     */
+    static void mockConsoleReader() throws IOException {
+        try {
+            Method loop = ConsoleReader.class.getDeclaredMethod("loop", Consumer.class, AtomicBoolean.class);
+            PowerMockito.mockStatic(ConsoleReader.class, Answers.CALLS_REAL_METHODS);
+            PowerMockito.doAnswer((Answer<Runnable>) invocation -> {
+                loop.invoke(null, invocation.getArgument(0), new AtomicBoolean(true));
+                return () -> {};
+            }).when(ConsoleReader.class);
+            ConsoleReader.startLoop(Mockito.any());
+        } catch(NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 
     private MockUtils() {}
