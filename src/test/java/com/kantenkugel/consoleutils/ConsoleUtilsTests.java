@@ -49,7 +49,7 @@ public class ConsoleUtilsTests {
 
     @Test
     public void testBackSpaceWithPlaceholders() throws Exception {
-        Supplier<Pair<String, String>> mock = mockIO("testing\u0008\u0008\u0008ing\nshould not matter");
+        Supplier<Pair<String, String>> mock = mockIO("testing\b\b\bing\nshould not matter");
         PowerMockito.mockStatic(ConsoleUtils.class, Answers.CALLS_REAL_METHODS);
         String s = ConsoleUtils.readHidden("*");
         PowerMockito.verifyStatic(ConsoleUtils.class, Mockito.times(3));
@@ -59,12 +59,12 @@ public class ConsoleUtilsTests {
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "should not matter", result.getKey());
         assertEquals("Console should contain placeholders, backspaces and spaces followed by newline",
-                String.format("*******%1$s%1$s%1$s***\n", "\u0008 \u0008"), result.getValue());
+                String.format("*******%1$s%1$s%1$s***\n", "\b \b"), result.getValue());
     }
 
     @Test
     public void testBackSpaceWithPlaceholdersTwo() throws Exception {
-        Supplier<Pair<String, String>> mock = mockIO("test\u0008\u0008\u0008\u0008\u0008ing\nshould not matter");
+        Supplier<Pair<String, String>> mock = mockIO("test\b\b\b\b\bing\nshould not matter");
         PowerMockito.mockStatic(ConsoleUtils.class, Answers.CALLS_REAL_METHODS);
         String s = ConsoleUtils.readHidden("*");
         PowerMockito.verifyStatic(ConsoleUtils.class, Mockito.times(4));
@@ -74,12 +74,12 @@ public class ConsoleUtilsTests {
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "should not matter", result.getKey());
         assertEquals("Console should contain placeholders, backspaces and spaces followed by newline",
-                String.format("****%1$s%1$s%1$s%1$s***\n", "\u0008 \u0008"), result.getValue());
+                String.format("****%1$s%1$s%1$s%1$s***\n", "\b \b"), result.getValue());
     }
 
     @Test
     public void testBackSpaceWithPlaceholdersThree() throws Exception {
-        Supplier<Pair<String, String>> mock = mockIO("test\u0008\u0008\u0008\u0008ing\nshould not matter");
+        Supplier<Pair<String, String>> mock = mockIO("test\b\b\b\bing\nshould not matter");
         PowerMockito.mockStatic(ConsoleUtils.class, Answers.CALLS_REAL_METHODS);
         String s = ConsoleUtils.readHidden("##");
         PowerMockito.verifyStatic(ConsoleUtils.class, Mockito.times(8));
@@ -89,7 +89,7 @@ public class ConsoleUtilsTests {
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "should not matter", result.getKey());
         assertEquals("Console should contain placeholders, backspaces and spaces followed by newline",
-                String.format("########%1$s%1$s%1$s%1$s%1$s%1$s%1$s%1$s######\n", "\u0008 \u0008"), result.getValue());
+                String.format("########%1$s%1$s%1$s%1$s%1$s%1$s%1$s%1$s######\n", "\b \b"), result.getValue());
     }
 
     @Test
@@ -106,27 +106,27 @@ public class ConsoleUtilsTests {
     @Test
     public void testControlSequenceWithPlaceholdersTwo() throws Exception {
         //"test", 4*BS, ^C, "nope..."
-        Supplier<Pair<String, String>> mock = mockIO("test\u0008\u0008\u0008\u0008%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
+        Supplier<Pair<String, String>> mock = mockIO("test\b\b\b\b%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
         String s = ConsoleUtils.readHidden("*");
         Pair<String, String> result = mock.get();
         assertNull("ConsoleUtils.readHidden should return null if control sequence empty input", s);
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "nope\nshould not matter", result.getKey());
         assertEquals("Console should be empty (through backspaces)",
-                String.format("****%1$s%1$s%1$s%1$s", "\u0008 \u0008"), result.getValue());
+                String.format("****%1$s%1$s%1$s%1$s", "\b \b"), result.getValue());
     }
 
     @Test
     public void testControlSequenceWithPlaceholdersThree() throws Exception {
         //"test", 5*BS, ^C, "nope..."
-        Supplier<Pair<String, String>> mock = mockIO("test\u0008\u0008\u0008\u0008\u0008%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
+        Supplier<Pair<String, String>> mock = mockIO("test\b\b\b\b\b%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
         String s = ConsoleUtils.readHidden("*");
         Pair<String, String> result = mock.get();
         assertNull("ConsoleUtils.readHidden should return null if control sequence empty input", s);
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "nope\nshould not matter", result.getKey());
         assertEquals("Console should be empty (through backspaces)",
-                String.format("****%1$s%1$s%1$s%1$s", "\u0008 \u0008"), result.getValue());
+                String.format("****%1$s%1$s%1$s%1$s", "\b \b"), result.getValue());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class ConsoleUtilsTests {
 
     @Test
     public void testBufferDeleteOne() throws Exception {
-        Supplier<Pair<String, String>> mock = mockIO("testing\u0008\u0008\u0008ing\nshould not matter");
+        Supplier<Pair<String, String>> mock = mockIO("testing\b\b\bing\nshould not matter");
         PowerMockito.mockStatic(ConsoleUtils.class, Answers.CALLS_REAL_METHODS);
         String s = ConsoleUtils.readWithInitialBuffer("buff");
         PowerMockito.verifyStatic(ConsoleUtils.class, Mockito.times(3));
@@ -152,12 +152,12 @@ public class ConsoleUtilsTests {
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "should not matter", result.getKey());
         assertEquals("Console should contain buffer + input + backspaces + newline",
-                String.format("bufftesting%1$s%1$s%1$sing\n", "\u0008 \u0008"), result.getValue());
+                String.format("bufftesting%1$s%1$s%1$sing\n", "\b \b"), result.getValue());
     }
 
     @Test
     public void testBufferDeleteTwo() throws Exception {
-        Supplier<Pair<String, String>> mock = mockIO("test\u0008\u0008\u0008\u0008\u0008\u0008ing\nshould not matter");
+        Supplier<Pair<String, String>> mock = mockIO("test\b\b\b\b\b\bing\nshould not matter");
         PowerMockito.mockStatic(ConsoleUtils.class, Answers.CALLS_REAL_METHODS);
         String s = ConsoleUtils.readWithInitialBuffer("buff");
         PowerMockito.verifyStatic(ConsoleUtils.class, Mockito.times(6));
@@ -167,12 +167,12 @@ public class ConsoleUtilsTests {
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "should not matter", result.getKey());
         assertEquals("Console should contain buffer + input + backspaces + newline",
-                String.format("bufftest%1$s%1$s%1$s%1$s%1$s%1$sing\n", "\u0008 \u0008"), result.getValue());
+                String.format("bufftest%1$s%1$s%1$s%1$s%1$s%1$sing\n", "\b \b"), result.getValue());
     }
 
     @Test
     public void testBufferDeleteThree() throws Exception {
-        Supplier<Pair<String, String>> mock = mockIO("test\u0008\u0008\u0008\u0008\u0008\u0008\u0008\u0008\u0008ing\nshould not matter");
+        Supplier<Pair<String, String>> mock = mockIO("test\b\b\b\b\b\b\b\b\bing\nshould not matter");
         PowerMockito.mockStatic(ConsoleUtils.class, Answers.CALLS_REAL_METHODS);
         String s = ConsoleUtils.readWithInitialBuffer("buff");
         PowerMockito.verifyStatic(ConsoleUtils.class, Mockito.times(8));
@@ -182,7 +182,7 @@ public class ConsoleUtilsTests {
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "should not matter", result.getKey());
         assertEquals("Console should contain buffer + input + backspaces + newline",
-                String.format("bufftest%1$s%1$s%1$s%1$s%1$s%1$s%1$s%1$sing\n", "\u0008 \u0008"), result.getValue());
+                String.format("bufftest%1$s%1$s%1$s%1$s%1$s%1$s%1$s%1$sing\n", "\b \b"), result.getValue());
     }
 
     @Test
@@ -199,40 +199,40 @@ public class ConsoleUtilsTests {
     @Test
     public void testControlSequenceWithBufferTwo() throws Exception {
         //"test", 4*BS, ^C, "nope..."
-        Supplier<Pair<String, String>> mock = mockIO("test\u0008\u0008\u0008\u0008%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
+        Supplier<Pair<String, String>> mock = mockIO("test\b\b\b\b%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
         String s = ConsoleUtils.readWithInitialBuffer("buff");
         Pair<String, String> result = mock.get();
         assertNull("ConsoleUtils.readWithInitialBuffer should return null if control sequence empty input", s);
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "nope\nshould not matter", result.getKey());
         assertEquals("Console should contain buffer+input+backspaces+newline",
-                String.format("bufftest%1$s%1$s%1$s%1$s", "\u0008 \u0008"), result.getValue());
+                String.format("bufftest%1$s%1$s%1$s%1$s", "\b \b"), result.getValue());
     }
 
     @Test
     public void testControlSequenceWithBufferThree() throws Exception {
         //"test", 8*BS, ^C, "nope..."
-        Supplier<Pair<String, String>> mock = mockIO("test\u0008\u0008\u0008\u0008\u0008\u0008\u0008\u0008%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
+        Supplier<Pair<String, String>> mock = mockIO("test\b\b\b\b\b\b\b\b%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
         String s = ConsoleUtils.readWithInitialBuffer("buff");
         Pair<String, String> result = mock.get();
         assertNull("ConsoleUtils.readWithInitialBuffer should return null if control sequence empty input", s);
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "nope\nshould not matter", result.getKey());
         assertEquals("Console should be empty (through backspaces)",
-                String.format("bufftest%1$s%1$s%1$s%1$s%1$s%1$s%1$s%1$s", "\u0008 \u0008"), result.getValue());
+                String.format("bufftest%1$s%1$s%1$s%1$s%1$s%1$s%1$s%1$s", "\b \b"), result.getValue());
     }
 
     @Test
     public void testControlSequenceWithBufferFour() throws Exception {
         //"test", 5*BS, "a", ^C, "nope..."
-        Supplier<Pair<String, String>> mock = mockIO("test\u0008\u0008\u0008\u0008\u0008a%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
+        Supplier<Pair<String, String>> mock = mockIO("test\b\b\b\b\ba%snope\nshould not matter", CharConstants.CHAR_CTRL_C);
         String s = ConsoleUtils.readWithInitialBuffer("buff");
         Pair<String, String> result = mock.get();
         assertEquals("ConsoleUtils.readWithInitialBuffer should return input if control sequence on buffer.length but unequal", "bufa", s);
         assertEquals("Remaining input mismatches. Program probably consumed to much/to little",
                 "nope\nshould not matter", result.getKey());
         assertEquals("Console should be buffer+input+backspaces+rest of input+newline",
-                String.format("bufftest%1$s%1$s%1$s%1$s%1$sa\n", "\u0008 \u0008"), result.getValue());
+                String.format("bufftest%1$s%1$s%1$s%1$s%1$sa\n", "\b \b"), result.getValue());
     }
 
 

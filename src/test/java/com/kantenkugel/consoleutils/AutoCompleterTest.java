@@ -26,7 +26,7 @@ import static com.kantenkugel.consoleutils.MockUtils.mockIO;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RawConsoleInput.class, ConsoleReader.class})
 public class AutoCompleterTest {
-    private static final String[] OPTIONS = {"test", "testing", "auto", "autocomplete", "foo", "bar", "tesla"};
+    private static final String[] OPTIONS = {"test", "testing", "auto", "autocomplete", "foo", "bar", "aurora", "auras"};
 
     @Mock
     private Function<String, String[]> optionProvider;
@@ -50,7 +50,7 @@ public class AutoCompleterTest {
     }
 
     private void verifyResults(List<String> expected) {
-        Mockito.verify(resultPredicate, Mockito.times(expected.size())).test(results.capture());
+        Mockito.verify(resultPredicate, Mockito.atLeast(0)).test(results.capture());
         assertEquals("Returned results mismatch", expected, results.getAllValues());
     }
 
@@ -78,7 +78,7 @@ public class AutoCompleterTest {
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("There should be no more console input", "", result.getKey());
-        assertEquals("Autocompletion for 'foo' with caret after 'f' should be shown", "foo\u0008\u0008", result.getValue());
+        assertEquals("Autocompletion for 'foo' with caret after 'f' should be shown", "foo\b\b", result.getValue());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class AutoCompleterTest {
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("Second line should remain in input buffer", "nope", result.getKey());
-        assertEquals("Autocompletion of 'foo' should be deleted after caret ('f')", "foo\u0008\u0008  \u0008\u0008", result.getValue());
+        assertEquals("Autocompletion of 'foo' should be deleted after caret ('f')", "foo\b\b  \b\b", result.getValue());
     }
 
     @Test
@@ -111,7 +111,81 @@ public class AutoCompleterTest {
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("Second line should remain in input buffer", "nope", result.getKey());
-        assertEquals("Autocompletion of 'foo' should be printed", "foo\u0008\u0008oo", result.getValue());
+        assertEquals("Autocompletion of 'foo' should be printed", "foo\b\boo", result.getValue());
+    }
+
+    @Test
+    public void spaceClearsCompletion() throws IOException {
+        Supplier<Pair<String, String>> mock = mockIO("f \nnope");
+        getDefaultCompleter().run();
+        verifyResults(Collections.singletonList("f "));
+        verifyOptionCalls(Collections.singletonList(""));
+        Pair<String, String> result = mock.get();
+        assertEquals("Second line should remain in input buffer", "nope", result.getKey());
+        assertEquals("Autocompletion of 'foo' should be cleared actually typed char", "foo\b\b  \b", result.getValue());
+    }
+
+    @Test
+    public void backspaceClearsCompletion() throws IOException {
+        Supplier<Pair<String, String>> mock = mockIO("f\b\nnope");
+        getDefaultCompleter().run();
+        verifyResults(Collections.singletonList(""));
+        verifyOptionCalls(Collections.singletonList(""));
+        Pair<String, String> result = mock.get();
+        assertEquals("Second line should remain in input buffer", "nope", result.getKey());
+        //write autocompletion, reset pointer to after f, on backspace delete 1 char, no more completion -> clear completion (3 chars)
+        assertEquals("Autocompletion of 'foo' should be cleared", "foo\b\b\b \b   \b\b\b", result.getValue());
+    }
+
+    @Test
+    public void incompatibleCharClearsCompletion() throws IOException {
+        Supplier<Pair<String, String>> mock = mockIO("fr\nnope");
+        getDefaultCompleter().run();
+        verifyResults(Collections.singletonList("fr"));
+        verifyOptionCalls(Collections.singletonList(""));
+        Pair<String, String> result = mock.get();
+        assertEquals("Second line should remain in input buffer", "nope", result.getKey());
+        //write autocompletion, reset pointer to after f, write next char, no more completion -> clear completion (1 chars)
+        assertEquals("Autocompletion of 'foo' should be cleared", "foo\b\br \b", result.getValue());
+    }
+
+    @Test
+    public void switchesToNextCompletionAfterComplete() throws IOException {
+        Supplier<Pair<String, String>> mock = mockIO("t\t");
+        getDefaultCompleter().run();
+        verifyResults(Collections.singletonList(null));
+        verifyOptionCalls(Collections.singletonList(""));
+        Pair<String, String> result = mock.get();
+        assertEquals("No input remaining", "", result.getKey());
+        //write autocompletion for 'test', autocomplete, then show autocompletion for 'testing'
+        assertEquals("Autocompletion of 'test' with followup completion of 'testing'",
+                "test\b\b\besting\b\b\b", result.getValue());
+    }
+
+    @Test
+    public void switchesToNextCompletionAfterMismatch() throws IOException {
+        Supplier<Pair<String, String>> mock = mockIO("aur");
+        getDefaultCompleter().run();
+        verifyResults(Collections.singletonList(null));
+        verifyOptionCalls(Collections.singletonList(""));
+        Pair<String, String> result = mock.get();
+        assertEquals("No input remaining", "", result.getKey());
+        //write autocompletion for auto, then upon aur, clear last char and complete to aurora
+        assertEquals("Autocompletion of 'auto' with correction to 'aurora'",
+                "auto\b\b\burora\b\b\b", result.getValue());
+    }
+
+    @Test
+    public void clearsRemainingCharsAfterSwitch() throws IOException {
+        Supplier<Pair<String, String>> mock = mockIO("aura");
+        getDefaultCompleter().run();
+        verifyResults(Collections.singletonList(null));
+        verifyOptionCalls(Collections.singletonList(""));
+        Pair<String, String> result = mock.get();
+        assertEquals("No input remaining", "", result.getKey());
+        //write autocompletion for auto, then upon aur, switch to aurora and after a switch to auras (and clear remaining
+        assertEquals("Autocompletion of 'auto' with correction to 'aurora' and correction to 'auras'",
+                "auto\b\b\burora\b\b\bas \b\b", result.getValue());
     }
 
     //TODO: A load more tests

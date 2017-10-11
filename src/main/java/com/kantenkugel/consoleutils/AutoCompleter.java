@@ -60,13 +60,13 @@ public class AutoCompleter implements Consumer<ConsoleInputEvent> {
         }
         if(addedChar == CharConstants.CHAR_BACKSPACE && currentAuto != null) {
             matchLength--;
-            clear(currentAuto.length() - matchLength);
-        }
-        if(addedChar == CharConstants.CHAR_TAB && currentAuto != null) {
+        } else if(addedChar == CharConstants.CHAR_TAB && currentAuto != null) {
             String substring = currentAuto.substring(matchLength);
             System.out.print(substring);
             e.getCurrentBuffer().replace(e.getCurrentBuffer().length() - 1, e.getCurrentBuffer().length(), substring);
             currentAuto = null;
+        } else if(currentAuto != null) {
+            matchLength++;
         }
         int index = e.getCurrentBuffer().lastIndexOf(" ");
         String lastWord = e.getCurrentBuffer().substring(index + 1);
@@ -84,6 +84,9 @@ public class AutoCompleter implements Consumer<ConsoleInputEvent> {
                     if(nextAuto.equals(currentAuto))
                         break;
                     System.out.print(s.substring(matchLength));
+                    if(currentAuto != null && currentAuto.length() > nextAuto.length()) {
+                        clear(currentAuto.length() - nextAuto.length());
+                    }
                     for(int i = 0; i < s.length() - matchLength; i++) {
                         System.out.print(CharConstants.CHAR_BACKSPACE);
                     }
