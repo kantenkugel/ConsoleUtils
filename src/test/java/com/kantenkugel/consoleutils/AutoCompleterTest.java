@@ -146,28 +146,62 @@ public class AutoCompleterTest {
     }
 
     @Test
-    public void switchesToNextCompletionAfterMismatch() throws IOException {
-        Supplier<Pair<String, String>> mock = mockIO("aur");
+    public void showsOnlyShortestCommonString() throws IOException {
+        Supplier<Pair<String, String>> mock = mockIO("auro");
         assertEquals("Return of AutoCompleter#get mismatches", null, getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("No input remaining", "", result.getKey());
-        //write autocompletion for auto, then upon aur, clear last char and complete to aurora
+        //write common prefix 'au' (auto, aurora, aura), on 'r' do nothing (aurora, aura), on 'o' print completion for aurora
         assertEquals("Autocompletion of 'auto' with correction to 'aurora'",
-                "auto\b\b\burora\b\b\b", result.getValue());
+                "au\burora\b\b", result.getValue());
     }
 
     @Test
-    public void clearsRemainingCharsAfterSwitch() throws IOException {
-        Supplier<Pair<String, String>> mock = mockIO("aura");
+    public void tabOnNoCompletionDoesNothing() throws IOException {
+        Supplier<Pair<String, String>> mock = mockIO("c\tool");
         assertEquals("Return of AutoCompleter#get mismatches", null, getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("No input remaining", "", result.getKey());
-        //write autocompletion for auto, then upon aur, switch to aurora and after a switch to auras (and clear remaining
-        assertEquals("Autocompletion of 'auto' with correction to 'aurora' and correction to 'auras'",
-                "auto\b\b\burora\b\b\bas \b\b", result.getValue());
+        assertEquals("Tab should not do anything if no autocompletion",
+                "cool", result.getValue());
     }
 
-    //TODO: A load more tests
+    @Test
+    public void dependentOptionsWorks() throws IOException {
+        AutoCompleter.DependentOptions root = new AutoCompleter.DependentOptions();
+
+        AutoCompleter.DependentOptions node = root.createOption("node");
+        node.createOption("i").createOptions("express", "evernode", "react");
+        node.createOption("u").createOptions("forever", "underscore");
+
+        root.createOption("notepad");
+
+        AutoCompleter autoCompleter = new AutoCompleter(root);
+
+        //"node i express react"
+        Supplier<Pair<String, String>> mock = mockIO("node i ex\t r\t\nnewline");
+        assertEquals("Return of AutoCompleter#get mismatches", "node i express react", autoCompleter.get());
+        Pair<String, String> result = mock.get();
+        assertEquals("Second input line remaining", "newline", result.getKey());
+        assertEquals("'node i express react' with DependentOptions fails to complete",
+                "no\bode\be i express\b\b\b\b\bpress react\b\b\b\beact", result.getValue());
+
+        //"notepad"
+        mock = mockIO("n\tt\t\nnewline");
+        assertEquals("Return of AutoCompleter#get mismatches", "notepad", autoCompleter.get());
+        result = mock.get();
+        assertEquals("Second input line remaining", "newline", result.getKey());
+        assertEquals("'notepad' with DependentOptions fails to complete",
+                "no\botepad\b\b\b\bepad", result.getValue());
+
+        //"node u n" (check level - should not complete n to node)
+        mock = mockIO("node u n\nnewline");
+        assertEquals("Return of AutoCompleter#get mismatches", "node u n", autoCompleter.get());
+        result = mock.get();
+        assertEquals("Second input line remaining", "newline", result.getKey());
+        assertEquals("'node u n' with DependentOptions fails",
+                "no\bode\be u n", result.getValue());
+    }
 }
