@@ -9,23 +9,17 @@ import java.util.function.Predicate;
  * @author Kantenkugel (Michael Ritter)
  */
 public class AutoCompleter implements Consumer<ConsoleInputEvent> {
-    private final Predicate<String> callback;
     private final Function<String, String[]> optionProvider;
 
-    private Runnable loopStopper;
+    private String result = null;
 
-    public AutoCompleter(Predicate<String> callback, Function<String, String[]> optionProvider) {
-        this.callback = callback;
+    public AutoCompleter(Function<String, String[]> optionProvider) {
         this.optionProvider = optionProvider;
     }
 
-    public void run() throws IOException {
-        loopStopper = ConsoleReader.startLoop(this);
-    }
-
-    public void stop() {
-        if(loopStopper != null)
-            loopStopper.run();
+    public String get() throws IOException {
+        ConsoleReader.startLoop(this);
+        return result;
     }
 
     private String currentAuto = null;
@@ -40,18 +34,16 @@ public class AutoCompleter implements Consumer<ConsoleInputEvent> {
         if(addedChar == CharConstants.CHAR_CTRL_C || addedChar == CharConstants.CHAR_CTRL_D
                 || addedChar == CharConstants.CHAR_CTRL_Z) {
             e.cancelLoop();
-            callback.test(null);
+            result = null;
             return;
         }
         if(addedChar == '\n') {
             if(currentAuto != null) {
                 clear(currentAuto.length() - matchLength);
             }
-            if(!callback.test(e.getCurrentBuffer().substring(0, e.getCurrentBuffer().length() - 1))) {
-                e.cancelLoop();
-                return;
-            }
-            e.clearBuffer();
+            result = e.getCurrentBuffer().substring(0, e.getCurrentBuffer().length() - 1);
+            e.cancelLoop();
+            return;
         }
         if(addedChar != CharConstants.CHAR_TAB) {
             if(addedChar == CharConstants.CHAR_BACKSPACE)

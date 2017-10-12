@@ -3,15 +3,15 @@ package com.kantenkugel.consoleutils;
 import biz.source_code.utils.RawConsoleInput;
 import javafx.util.Pair;
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.*;
@@ -24,34 +24,26 @@ import static com.kantenkugel.consoleutils.MockUtils.mockIO;
  * @author Kantenkugel (Michael Ritter)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RawConsoleInput.class, ConsoleReader.class})
+@PrepareForTest(RawConsoleInput.class)
 public class AutoCompleterTest {
     private static final String[] OPTIONS = {"test", "testing", "auto", "autocomplete", "foo", "bar", "aurora", "auras"};
 
+    @Rule
+    public Timeout globalTimeout = Timeout.seconds(10);
+
     @Mock
     private Function<String, String[]> optionProvider;
-    @Mock
-    private Predicate<String> resultPredicate;
     @Captor
     private ArgumentCaptor<String> optionCalls;
-    @Captor
-    private ArgumentCaptor<String> results;
 
     @Before
     public void setupMocks() throws IOException {
-        MockUtils.mockConsoleReader();
         MockitoAnnotations.initMocks(this);
         Mockito.when(optionProvider.apply(Mockito.anyString())).thenReturn(OPTIONS);
-        Mockito.when(resultPredicate.test(Mockito.anyString())).thenReturn(false);
     }
 
     private AutoCompleter getDefaultCompleter() {
-        return new AutoCompleter(resultPredicate, optionProvider);
-    }
-
-    private void verifyResults(List<String> expected) {
-        Mockito.verify(resultPredicate, Mockito.atLeast(0)).test(results.capture());
-        assertEquals("Returned results mismatch", expected, results.getAllValues());
+        return new AutoCompleter(optionProvider);
     }
 
     private void verifyOptionCalls(List<String> expected) {
@@ -62,8 +54,7 @@ public class AutoCompleterTest {
     @Test
     public void testEmptyInput() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList(null));
+        assertEquals("Return of AutoCompleter#get mismatches", null, getDefaultCompleter().get());
         verifyOptionCalls(Collections.emptyList());
         Pair<String, String> result = mock.get();
         assertEquals("There should be no more console input", "", result.getKey());
@@ -73,8 +64,7 @@ public class AutoCompleterTest {
     @Test
     public void showsCompletion() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("f");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList(null));
+        assertEquals("Return of AutoCompleter#get mismatches", null, getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("There should be no more console input", "", result.getKey());
@@ -84,8 +74,7 @@ public class AutoCompleterTest {
     @Test
     public void newlineSubmits() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("x\nnope");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList("x"));
+        assertEquals("Return of AutoCompleter#get mismatches", "x", getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("Second line should remain in input buffer", "nope", result.getKey());
@@ -95,8 +84,7 @@ public class AutoCompleterTest {
     @Test
     public void newlineClearsSuggestion() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("f\nnope");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList("f"));
+        assertEquals("Return of AutoCompleter#get mismatches", "f", getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("Second line should remain in input buffer", "nope", result.getKey());
@@ -106,8 +94,7 @@ public class AutoCompleterTest {
     @Test
     public void tabCompletes() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("f\t\nnope");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList("foo"));
+        assertEquals("Return of AutoCompleter#get mismatches", "foo", getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("Second line should remain in input buffer", "nope", result.getKey());
@@ -117,8 +104,7 @@ public class AutoCompleterTest {
     @Test
     public void spaceClearsCompletion() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("f \nnope");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList("f "));
+        assertEquals("Return of AutoCompleter#get mismatches", "f ", getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("Second line should remain in input buffer", "nope", result.getKey());
@@ -128,8 +114,7 @@ public class AutoCompleterTest {
     @Test
     public void backspaceClearsCompletion() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("f\b\nnope");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList(""));
+        assertEquals("Return of AutoCompleter#get mismatches", "", getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("Second line should remain in input buffer", "nope", result.getKey());
@@ -140,8 +125,7 @@ public class AutoCompleterTest {
     @Test
     public void incompatibleCharClearsCompletion() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("fr\nnope");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList("fr"));
+        assertEquals("Return of AutoCompleter#get mismatches", "fr", getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("Second line should remain in input buffer", "nope", result.getKey());
@@ -152,8 +136,7 @@ public class AutoCompleterTest {
     @Test
     public void switchesToNextCompletionAfterComplete() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("t\t");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList(null));
+        assertEquals("Return of AutoCompleter#get mismatches", null, getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("No input remaining", "", result.getKey());
@@ -165,8 +148,7 @@ public class AutoCompleterTest {
     @Test
     public void switchesToNextCompletionAfterMismatch() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("aur");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList(null));
+        assertEquals("Return of AutoCompleter#get mismatches", null, getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("No input remaining", "", result.getKey());
@@ -178,8 +160,7 @@ public class AutoCompleterTest {
     @Test
     public void clearsRemainingCharsAfterSwitch() throws IOException {
         Supplier<Pair<String, String>> mock = mockIO("aura");
-        getDefaultCompleter().run();
-        verifyResults(Collections.singletonList(null));
+        assertEquals("Return of AutoCompleter#get mismatches", null, getDefaultCompleter().get());
         verifyOptionCalls(Collections.singletonList(""));
         Pair<String, String> result = mock.get();
         assertEquals("No input remaining", "", result.getKey());

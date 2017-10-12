@@ -10,7 +10,12 @@ import java.util.function.Consumer;
  * @author Kantenkugel (Michael Ritter)
  */
 public class ConsoleReader {
-    public static Runnable startLoop(Consumer<ConsoleInputEvent> consoleHandler) throws IOException {
+
+    public static void startLoop(Consumer<ConsoleInputEvent> consoleHandler) throws IOException {
+        loop(consoleHandler, new AtomicBoolean(true));
+    }
+
+    public static Runnable startLoopAsync(Consumer<ConsoleInputEvent> consoleHandler) throws IOException {
         AtomicBoolean running = new AtomicBoolean(true);
         new Thread(() -> {
             try {

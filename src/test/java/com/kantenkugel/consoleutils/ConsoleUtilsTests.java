@@ -2,7 +2,9 @@ package com.kantenkugel.consoleutils;
 
 import biz.source_code.utils.RawConsoleInput;
 import javafx.util.Pair;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mockito;
@@ -24,6 +26,8 @@ import java.util.function.Supplier;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RawConsoleInput.class, ConsoleUtils.class})
 public class ConsoleUtilsTests {
+    @Rule
+    public Timeout globalTimeout = Timeout.seconds(10);
 
     @Test
     public void testEmptyInput() throws IOException {
