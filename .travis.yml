@@ -5,6 +5,8 @@ branches:
     - /^v\d+(\.\d+)+$/
 deploy:
   provider: releases
+  api_key:
+    secure: st3Nljnwon6ei28Nuxb3gJZ89RtsV3mxuwFnEwLJh/gscWgh4OQ2W/lhTAHBdLqC8H3sJEwcXXJt8RKYB4FX2evYn4Lv+CARcw7J4nUba3/zSLPwpWsgL3ITo9U2vti3ezywsTpwBQERYx3WgKZqn5WhLcb+PyTXx30AZ9P02xIPfBvNcgYNaQjJi+LOFxKNB9fm+wMhY3ZuU81AFGLvBRdByYao9BAZuoz2USRM2I1Ohbm2giyXSfc1cHfS/FBqRdjftoFcxw//79C4ZGJuJJVcq4fV3z208qZjOHK7XUHQAGthmEtZiz4sqkDq5ECZN9uni9gGGVqqonMgKSDiWQuVJjRwnDyAQNYj8W0OO1ps2zqBV85esgVMMNmwAa5I9Xkn8lgTXY3Znj34CtduWoCACsGBmKhGVnhEG+EK6o5y0xURiPs7+VV5VlF0pk2OsBB/zgCopxQHQHgDjPyuHQIH+8IK9pGbD2ByJ2QQfCnHwOexmYWNsDEqGuzwGTpJ9tT4CYCDM83CWkopa1TlPtqHx1Ny8sIzWn4S4/sqCW1LwPYDG8d6t6avqc9+Ac3fp/7u1/f4UFIL5nqMgYlNeTcgNTXqDIWYtGXa4U/d+7HD3rNY1+faHtERhNs1In9DLwWGv8K4E0LuL0TDRcHXmUTM3wY5LR7BgP0BrxVvj9k=
   file_glob: true
   file: build/libs/*.jar
   skip_cleanup: true
